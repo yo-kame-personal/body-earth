@@ -1,7 +1,8 @@
 import { useGLTF } from '@react-three/drei'
 import { useLayoutEffect, useMemo } from 'react'
-import { Mesh, MeshStandardMaterial } from 'three'
+import { DoubleSide, FrontSide, Mesh, MeshStandardMaterial } from 'three'
 import { type LayerId, layerOpacity } from '../../lib/depth'
+import { CLIP_PLANES, makeRimInjector, rimStrength } from '../../lib/layerMaterial'
 import { useBodyStore } from '../../store'
 
 interface ModelLayerProps {
@@ -16,30 +17,34 @@ interface ModelLayerProps {
 
 /**
  * glbモデルを1レイヤーとして読み込み、depthに連動した不透明度でフェードさせる。
+ * BodyPart（プリミティブ）と同じFresnel縁発光・断面clipを共有マテリアル処理で適用する。
  * 必ず <Suspense> の内側で使うこと（ロード中はサスペンドする）。
- *
- * NOTE: これはStep A用の土台。実モデル(関節学glb)を入れたら、
- * 向き/スケール/中心位置の調整と、BodyPart相当のFresnel縁発光・断面clip対応を
- * モデルのマテリアル構成を見てから追加する（現状は素のopacityフェードのみ）。
  */
 export function ModelLayer({ src, layer, position, rotation, scale }: ModelLayerProps) {
   // 第2引数trueでDraco対応（drei既定のCDNデコーダを使用）
   const { scene } = useGLTF(import.meta.env.BASE_URL.replace(/\/$/, '') + src, true)
   const opacity = useBodyStore((s) => layerOpacity(layer, s.depth))
+  const clip = useBodyStore((s) => s.clip)
 
-  // 共有キャッシュを汚さないよう、シーンとマテリアルを複製して独立させる
+  // レイヤー内の全マテリアルで共有する縁発光強度のuniform
+  const rimUniform = useMemo(() => ({ value: 0 }), [])
+  rimUniform.value = rimStrength(opacity)
+
+  // 共有キャッシュを汚さないよう、シーンとマテリアルを複製して独立させる。
+  // 複製時にFresnel注入を仕込む（注入は全マテリアル同一でプログラム共有）
   const cloned = useMemo(() => {
+    const inject = makeRimInjector(rimUniform)
     const root = scene.clone(true)
     root.traverse((obj) => {
       if (obj instanceof Mesh) {
-        const src = obj.material as MeshStandardMaterial
-        const m = src.clone()
+        const m = (obj.material as MeshStandardMaterial).clone()
         m.transparent = true
+        m.onBeforeCompile = inject
         obj.material = m
       }
     })
     return root
-  }, [scene])
+  }, [scene, rimUniform])
 
   // depth変化のたびに不透明度と表示可否を更新
   useLayoutEffect(() => {
@@ -52,6 +57,18 @@ export function ModelLayer({ src, layer, position, rotation, scale }: ModelLayer
       }
     })
   }, [cloned, opacity])
+
+  // 断面トグルに連動。side変更はシェーダー再コンパイルが要るのでneedsUpdate
+  useLayoutEffect(() => {
+    cloned.traverse((obj) => {
+      if (obj instanceof Mesh) {
+        const m = obj.material as MeshStandardMaterial
+        m.side = clip ? DoubleSide : FrontSide
+        m.clippingPlanes = clip ? CLIP_PLANES : null
+        m.needsUpdate = true
+      }
+    })
+  }, [cloned, clip])
 
   return <primitive object={cloned} position={position} rotation={rotation} scale={scale} />
 }
