@@ -54,9 +54,10 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 
 1. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
 2. 実3Dモデル置き換え: **方針は `docs/3d-model-research.md` に確定済み**。
-   Z-Anatomy(CC BY-SA 4.0)を源泉にBlenderで3レイヤーの軽量Draco glbを自作する案。
-   **まず骨格1モデルだけ差し替えるStep A（PoC）から**。Blender作業が前提でコードだけでは完結しない点に注意。
-   コード側の先行準備として`GLTFLoader/DRACOLoader`組み込みの`<ModelLayer>`試作が可能
+   **Blender不要ルートが判明**: Z-AnatomyのSketchfabモデルをglb直DL（要無料アカウント）→
+   `gltf-transform`でsimplify＋Draco圧縮（私が自動化可）→ `<ModelLayer>`で読み込み。
+   **Step A=骨格(Osteology)1個だけ差し替えるPoCから**。ユーザーの手作業はSketchfab DLのみ。
+   モデルは超高ポリ(180万〜200万三角形)なので軽量化必須。ライセンスはモデル毎にCC BY/BY-SAを確認・クレジット表記要
 3. 細かい改善候補: 断面位置を動かすスライダー、断面モード中のraycast抑制、部位データの充実（ダミー→実データ）
 
 ## 5. 検証用メモ

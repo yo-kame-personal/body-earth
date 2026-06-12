@@ -51,6 +51,35 @@
 - **Step A（小さく試す）**: まず**骨格レイヤーだけ**を実モデルに差し替え（Sketchfabの骨格モデル1個をglbで）。depth=1の見栄えが一番効くため費用対効果が高い。皮膚・筋肉はプリミティブのまま当面維持。
 - **Step B**: 筋肉・皮膚も順次置き換え。
 
+## Sketchfab直DL調査結果（2026-06-13 追記）
+
+「Blenderを使わずSketchfabからglbを直接落とせるか」を確認した結論:
+
+- **glb直DLは可能。Blenderでの形式変換は不要。** Z-AnatomyはSketchfabに系統別モデルを公開しており（無料）、Sketchfabの「Download 3D Model」から **glTF/glb形式で取得できる**（ただしダウンロードには**無料のSketchfabアカウントでのログインが必要**）。
+- **系統別モデル名（Terminologia Anatomica準拠）**:
+  - Osteology=骨学（骨格）, Arthrology=関節学, Myology=筋学（筋肉）,
+    Angiology=脈管学（血管）, Splanchnology=内臓学（臓器）, Neurology=神経学
+- **ライセンスはモデルごとに異なる**ので都度確認が必要:
+  - Arthrology → **CC BY 4.0**（表示のみ・継承不要）
+  - Myology / Splanchnology → **CC BY-SA 4.0**（表示＋継承）
+- **最大の問題はポリゴン数。超高精細でWebには重すぎる**:
+  - Arthrology: **約180万三角形** / Splanchnology: **約200万三角形**
+  - Web向きは数万〜30万三角形程度。**そのままでは確実に固まる → 軽量化(simplify)が必須**
+
+### つまり「Blender変換」は不要だが「軽量化」は必須
+ただし軽量化は**Blenderを使わずコマンドラインで自動化できる**。これが今回の最大の収穫:
+- `gltf-transform`（npm。Don McCurdy作）で `weld` → `simplify`(meshoptimizer) → `draco`圧縮 を一括実行
+- 例: `npx @gltf-transform/cli optimize in.glb out.glb --simplify-error 0.01 --compress draco`
+- → **私(Claude)がスクリプト化して実行可能**。あなたの手作業はSketchfabからのDLのみ。
+
+### 改訂版・最短ルート（Step A: 骨格PoC、Blender不要）
+1. **あなた**: 無料Sketchfabアカウントを作成 → Osteology（骨格）モデルを **glbでダウンロード** → リポジトリの `assets-src/` に置く（手作業はこれだけ・5分）
+2. **私**: `gltf-transform` で simplify＋Draco圧縮し、数百KB〜2MB級の `public/models/skeleton.glb` を生成
+3. **私**: `<ModelLayer src=...>`（GLTFLoader+DRACOLoader）を実装し、depth=1の骨格プリミティブを実モデルに差し替え
+4. **私**: クレジット表記とモデル用LICENSEを追加（CC BYまたはBY-SAに従う）
+
+→ 良ければStep Aで見栄えを確認してから、筋肉・臓器・皮膚へ展開（Step B）。
+
 ## このリポジトリでの次アクション
 - **Blender作業が前提**（コードだけでは完結しない）。Blenderの用意とエクスポート可否がボトルネック。
 - コード側で先に準備できること（次セッション候補）:
