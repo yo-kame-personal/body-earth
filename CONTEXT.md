@@ -1,7 +1,7 @@
 # CONTEXT.md — BODY EARTH 開発引き継ぎ
 
 > 人体版 Google Earth（Webベース3Dインタラクティブアプリ）のMVP。
-> 最終更新: 2026-06-13（セッション2終了時）
+> 最終更新: 2026-06-13（セッション3: Pages公開＋Fresnel縁発光まで完了）
 
 ## 1. 現在のステータス
 
@@ -16,6 +16,7 @@
   - クリック→InfoPanel表示（皮膚・心臓）、×ボタンで閉じる ✓
   - スライダー→カメラ距離のイージング（中間値を経由して収束） ✓
   - ホイールズーム→depth同期の回帰なし ✓
+  - レイヤー遷移中のFresnel縁発光（depth=0.3/0.65で発光、0/1で消灯） ✓
 - ローカル起動方法: `cd ~/Desktop/dev/body-earth && npm run dev`
 
 ## 2. 技術スタックとアーキテクチャ
@@ -33,7 +34,7 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 - `src/store.ts` — zustandストア。`depth`(0〜1)と`selectedId`だけが全状態。URLの`?depth=0.7`で初期深度指定可（デバッグ用）
 - `src/lib/depth.ts` — **最重要ファイル**。カメラ距離↔深度の変換と、レイヤーごとの不透明度カーブ（台形関数`trapezoid`）。`CURVES`定数を調整すれば遷移タイミングを変えられる。MIN_DISTANCE=3.4 / MAX_DISTANCE=7
 - `src/components/CameraRig.tsx` — 双方向同期＋イージング。スライダー由来のdepth変化は`MathUtils.damp`（λ=6）で目標距離へ滑らかに移動、ユーザーがホイール/ドラッグを始めたら`start`イベントで即中断。ホイールは`enableDamping`(0.08)の慣性。カメラ操作由来かスライダー由来かはepsilon(0.02)で判別
-- `src/components/BodyPart.tsx` — 全パーツ共通のメッシュラッパー。不透明度0.35未満の層はクリックを奥の層へ通す（`stopPropagation`しない）のがミソ
+- `src/components/BodyPart.tsx` — 全パーツ共通のメッシュラッパー。不透明度0.35未満の層はクリックを奥の層へ通す（`stopPropagation`しない）のがミソ。Fresnel縁発光は`onBeforeCompile`でGLSL注入（強度`4*o*(1-o)*1.4`、半透明時のみ発光）。注入コードが全パーツ同一なのでGPUプログラムは1つに共有され、uniform `uRim`だけマテリアル毎に独立（three r184で確認済み）
 - `src/components/layers/` — SkinLayer / MuscleLayer / CoreLayer。renderOrderは内側0→外側2で透明描画の破綻を抑制
 - `src/data/parts.ts` — 部位ID→ダミー解説データ（21部位）。InfoPanelが参照
 - `scripts/verify-click.mjs` / `scripts/verify-easing.mjs` — headless検証スクリプト（devサーバー起動が前提）
@@ -49,7 +50,6 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 ## 4. 次セッションでやること（優先順）
 
 1. 体験の質向上（残りの候補）:
-   - レイヤー遷移にFresnel風の縁発光シェーダー（ホログラム感）
    - `clippingPlanes`による断面表示モード
 2. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
 3. 中期: フリーのglTF人体モデル（例: Z-Anatomy、BodyParts3D）への置き換え調査
