@@ -57,11 +57,12 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 
 ## 4. 次セッションでやること（優先順）
 
-1. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
-2. 実モデル化の続き（**Step A=骨格は完了。ModelLayerのFresnel/clip対応も完了**。`docs/3d-model-research.md`参照）:
+（スマホ実機の操作感はユーザーが確認済み 2026-06-13）
+
+1. 実モデル化の続き（**Step A=骨格は完了。ModelLayerのFresnel/clip対応も完了**。`docs/3d-model-research.md`参照）:
    - depth=1で内臓（プリミティブ）が実骨格に対しやや大きい/雑 → 内臓のサイズ微調整 or 実モデル化（Step B: 内臓学glb。CC BY-SA注意）
    - Step B: 筋肉・皮膚も実モデル化（筋学/Myologyは CC BY-SA）。手順は確立済み（DL→optimize-model.mjs→ModelLayer）
-3. 細かい改善候補: 断面位置を動かすスライダー、断面モード中のraycast抑制、部位データの充実（ダミー→実データ）
+2. 細かい改善候補: 断面位置を動かすスライダー、断面モード中のraycast抑制、部位データの充実（ダミー→実データ）
 
 ## 5. 検証用メモ
 
