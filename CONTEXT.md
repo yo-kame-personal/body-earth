@@ -1,7 +1,7 @@
 # CONTEXT.md — BODY EARTH 開発引き継ぎ
 
 > 人体版 Google Earth（Webベース3Dインタラクティブアプリ）のMVP。
-> 最終更新: 2026-06-13（セッション3: Pages公開＋Fresnel縁発光まで完了）
+> 最終更新: 2026-06-13（セッション3: Pages公開＋Fresnel縁発光＋断面表示まで完了）
 
 ## 1. 現在のステータス
 
@@ -17,6 +17,7 @@
   - スライダー→カメラ距離のイージング（中間値を経由して収束） ✓
   - ホイールズーム→depth同期の回帰なし ✓
   - レイヤー遷移中のFresnel縁発光（depth=0.3/0.65で発光、0/1で消灯） ✓
+  - 断面表示モード（「断面」トグル / `?clip=1`。回り込むと断面、OFFで通常描画に復帰） ✓
 - ローカル起動方法: `cd ~/Desktop/dev/body-earth && npm run dev`
 
 ## 2. 技術スタックとアーキテクチャ
@@ -35,6 +36,7 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 - `src/lib/depth.ts` — **最重要ファイル**。カメラ距離↔深度の変換と、レイヤーごとの不透明度カーブ（台形関数`trapezoid`）。`CURVES`定数を調整すれば遷移タイミングを変えられる。MIN_DISTANCE=3.4 / MAX_DISTANCE=7
 - `src/components/CameraRig.tsx` — 双方向同期＋イージング。スライダー由来のdepth変化は`MathUtils.damp`（λ=6）で目標距離へ滑らかに移動、ユーザーがホイール/ドラッグを始めたら`start`イベントで即中断。ホイールは`enableDamping`(0.08)の慣性。カメラ操作由来かスライダー由来かはepsilon(0.02)で判別
 - `src/components/BodyPart.tsx` — 全パーツ共通のメッシュラッパー。不透明度0.35未満の層はクリックを奥の層へ通す（`stopPropagation`しない）のがミソ。Fresnel縁発光は`onBeforeCompile`でGLSL注入（強度`4*o*(1-o)*1.4`、半透明時のみ発光）。注入コードが全パーツ同一なのでGPUプログラムは1つに共有され、uniform `uRim`だけマテリアル毎に独立（three r184で確認済み）
+- 断面表示 — `store.clip` + DepthSliderの「断面」トグル。BodyPartが世界固定平面`CLIP_PLANES`(z=0, 前半分カット)を`clippingPlanes`に適用、`Canvas gl={{localClippingEnabled:true}}`が前提。断面中はDoubleSide＋裏面を`diffuse*0.45`で底上げ（GLSL注入内の`gl_FrontFacing`分岐）。clip切替はマテリアルの`key`を変えて作り直す方式
 - `src/components/layers/` — SkinLayer / MuscleLayer / CoreLayer。renderOrderは内側0→外側2で透明描画の破綻を抑制
 - `src/data/parts.ts` — 部位ID→ダミー解説データ（21部位）。InfoPanelが参照
 - `scripts/verify-click.mjs` / `scripts/verify-easing.mjs` — headless検証スクリプト（devサーバー起動が前提）
@@ -46,16 +48,16 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 3. 足元(feet)とtorso下端の接続など、プロポーションの粗さ多数（モックなので許容）
 4. depth=1で頭蓋骨の最上部がわずかに見切れる（許容範囲と判断。気になるならMIN_DISTANCE微増 or カメラtargetのy調整）
 5. Actionsで`actions/deploy-pages@v4`にNode 20非推奨警告（v4が最新。GitHub側の更新待ちで実害なし。checkout/setup-nodeはv5に更新済み）
+6. 断面のフタ（cap）なし: クリップ面は中空シェルの内壁が見える簡易方式（capはstencil描画が必要で未対応）。クリップで消えた部分もraycastには当たるため、断面モード中は見えない部位をクリック選択できてしまう
 
 ## 4. 次セッションでやること（優先順）
 
-1. 体験の質向上（残りの候補）:
-   - `clippingPlanes`による断面表示モード
-2. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
-3. 中期: フリーのglTF人体モデル（例: Z-Anatomy、BodyParts3D）への置き換え調査
+1. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
+2. 中期: フリーのglTF人体モデル（例: Z-Anatomy、BodyParts3D）への置き換え調査
+3. 細かい改善候補: 断面位置を動かすスライダー、断面モード中のraycast抑制、部位データの充実（ダミー→実データ）
 
 ## 5. 検証用メモ
 
-- 検証スクリプト: `node scripts/verify-click.mjs` / `node scripts/verify-easing.mjs`（要devサーバー）
+- 検証スクリプト: `node scripts/verify-{click,easing,clip}.mjs`（要devサーバー。base設定によりURLは `http://localhost:5173/body-earth/`）
 - 深度別スクショ例: `npx playwright screenshot --viewport-size=1280,800 --wait-for-timeout=4000 "http://localhost:5173/?depth=1" out.png`
 - previewサーバ: `npm run preview -- --port 4399`
