@@ -1,10 +1,14 @@
 import type { ThreeEvent } from '@react-three/fiber'
 import { useMemo, useState, type ReactNode } from 'react'
+import { DoubleSide, FrontSide, Plane, Vector3 } from 'three'
 import type { WebGLProgramParametersWithUniforms } from 'three'
 import { useBodyStore } from '../store'
 
 // これ未満の不透明度の層はクリックを奥の層へ通す
 const CLICKABLE_MIN_OPACITY = 0.35
+
+// 断面表示: 世界座標z>0（体の前半分）をクリップする固定平面
+const CLIP_PLANES = [new Plane(new Vector3(0, 0, -1), 0)]
 
 // クロスフェード中(半透明)ほど強くなる縁発光。o=0/1ではゼロでホログラム感を出す
 function rimStrength(opacity: number): number {
@@ -36,6 +40,7 @@ export function BodyPart({
 }: BodyPartProps) {
   const select = useBodyStore((s) => s.select)
   const selected = useBodyStore((s) => s.selectedId === partId)
+  const clip = useBodyStore((s) => s.clip)
   const [hovered, setHovered] = useState(false)
   const interactive = opacity >= CLICKABLE_MIN_OPACITY
 
@@ -57,6 +62,8 @@ export function BodyPart({
           [
             'float rimFresnel = pow( 1.0 - saturate( dot( normalize( vNormal ), normalize( vViewPosition ) ) ), 2.5 );',
             'outgoingLight += RIM_COLOR * rimFresnel * uRim;',
+            // 裏面=断面モードで見える内壁。光が届かず真っ黒になるのでパーツ色で底上げ
+            'if ( ! gl_FrontFacing ) outgoingLight += diffuse * 0.45;',
             '#include <opaque_fragment>',
           ].join('\n'),
         )
@@ -90,11 +97,16 @@ export function BodyPart({
       }}
     >
       {children}
+      {/* keyでclip切替時にマテリアルを作り直し、side/clippingPlanesの
+          変更に伴うシェーダー再コンパイル管理をthreeに任せる */}
       <meshStandardMaterial
+        key={clip ? 'clip' : 'plain'}
         color={color}
         roughness={roughness}
         transparent
         opacity={opacity}
+        side={clip ? DoubleSide : FrontSide}
+        clippingPlanes={clip ? CLIP_PLANES : null}
         onBeforeCompile={injectRim}
         depthWrite={opacity > 0.95}
         emissive={selected || hovered ? '#ffffff' : '#000000'}

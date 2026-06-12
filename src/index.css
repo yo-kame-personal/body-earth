@@ -81,11 +81,35 @@ canvas {
   accent-color: #5b8cff;
 }
 
+.depth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+
 .depth-current {
   text-align: center;
   font-size: 12px;
-  margin-top: 6px;
   color: #cdd8ee;
+}
+
+.clip-toggle {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #8fa3c8;
+  background: transparent;
+  border: 1px solid rgba(143, 163, 200, 0.35);
+  border-radius: 8px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.clip-toggle.on {
+  color: #eaf3ff;
+  background: rgba(91, 140, 255, 0.35);
+  border-color: #5b8cff;
 }
 
 /* ---- インフォパネル ---- */

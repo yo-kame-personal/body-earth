@@ -4,6 +4,8 @@ import { useBodyStore } from '../../store'
 export function DepthSlider() {
   const depth = useBodyStore((s) => s.depth)
   const setDepth = useBodyStore((s) => s.setDepth)
+  const clip = useBodyStore((s) => s.clip)
+  const toggleClip = useBodyStore((s) => s.toggleClip)
 
   return (
     <div className="depth-slider">
@@ -21,8 +23,17 @@ export function DepthSlider() {
         onChange={(e) => setDepth(Number(e.target.value))}
         aria-label="深度スライダー"
       />
-      <div className="depth-current">
-        現在のレイヤー: {activeLayerLabel(depth)}（深度 {(depth * 100).toFixed(0)}%）
+      <div className="depth-footer">
+        <div className="depth-current">
+          現在のレイヤー: {activeLayerLabel(depth)}（深度 {(depth * 100).toFixed(0)}%）
+        </div>
+        <button
+          className={`clip-toggle${clip ? ' on' : ''}`}
+          onClick={toggleClip}
+          aria-pressed={clip}
+        >
+          断面 {clip ? 'ON' : 'OFF'}
+        </button>
       </div>
     </div>
   )

@@ -13,6 +13,7 @@ export default function App() {
       <Canvas
         camera={{ position: [0, 0.6, depthToDistance(initialDepth)], fov: 42 }}
         dpr={[1, 2]}
+        gl={{ localClippingEnabled: true }}
         onPointerMissed={() => useBodyStore.getState().select(null)}
       >
         <Scene />
