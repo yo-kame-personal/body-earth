@@ -1,4 +1,5 @@
 import { Stars } from '@react-three/drei'
+import { Suspense } from 'react'
 import { CameraRig } from './CameraRig'
 import { CoreLayer } from './layers/CoreLayer'
 import { MuscleLayer } from './layers/MuscleLayer'
@@ -12,11 +13,14 @@ export function Scene() {
       <directionalLight position={[3, 4, 5]} intensity={1.4} />
       <directionalLight position={[-4, 2, -3]} intensity={0.4} color="#8fb0ff" />
       <Stars radius={60} depth={30} count={2500} factor={3} fade speed={0.5} />
-      <group>
-        <CoreLayer />
-        <MuscleLayer />
-        <SkinLayer />
-      </group>
+      {/* glbロード中はレイヤーをサスペンドさせる（背景・カメラは先に出る） */}
+      <Suspense fallback={null}>
+        <group>
+          <CoreLayer />
+          <MuscleLayer />
+          <SkinLayer />
+        </group>
+      </Suspense>
       <CameraRig />
     </>
   )

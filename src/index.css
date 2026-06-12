@@ -54,6 +54,17 @@ canvas {
   margin-top: 6px;
 }
 
+.hud .credit {
+  font-size: 10px;
+  color: #5f6f8c;
+  margin-top: 4px;
+}
+
+.hud .credit a {
+  color: #7d90b5;
+  text-decoration: underline;
+}
+
 /* ---- 深度スライダー ---- */
 .depth-slider {
   position: absolute;
