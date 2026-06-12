@@ -5,17 +5,18 @@
 
 ## 1. 現在のステータス
 
-**MVP完成・全主要動作を検証済み・git管理開始。**
+**MVP完成・全主要動作を検証済み・GitHub Pages公開済み。**
 
+- **公開URL: https://yo-kame-personal.github.io/body-earth/**
+- リポジトリ: https://github.com/yo-kame-personal/body-earth （mainへのpushで自動デプロイ）
 - `npm run build` 成功（TypeScriptエラーなし）
-- 検証済みの動作（headless Playwright + スクショ目視）:
+- 検証済みの動作（headless Playwright + スクショ目視。公開URLでも確認済み）:
   - depth=0 / 0.5 / 1 のレイヤー表示とクロスフェード ✓
   - depth=1: MIN_DISTANCE=3.4 で骨格・内臓が頭蓋骨込みで収まる構図 ✓
   - クリック→InfoPanel表示（皮膚・心臓）、×ボタンで閉じる ✓
   - スライダー→カメラ距離のイージング（中間値を経由して収束） ✓
   - ホイールズーム→depth同期の回帰なし ✓
-- git初期化済み・mainブランチ2コミット（user.emailはnoreplyに設定済み）
-- 起動方法: `cd ~/Desktop/dev/body-earth && npm run dev`
+- ローカル起動方法: `cd ~/Desktop/dev/body-earth && npm run dev`
 
 ## 2. 技術スタックとアーキテクチャ
 
@@ -43,16 +44,14 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 2. バンドルが約1.1MB（three.js本体）。警告が出るが動作には無問題
 3. 足元(feet)とtorso下端の接続など、プロポーションの粗さ多数（モックなので許容）
 4. depth=1で頭蓋骨の最上部がわずかに見切れる（許容範囲と判断。気になるならMIN_DISTANCE微増 or カメラtargetのy調整）
+5. Actionsで`actions/deploy-pages@v4`にNode 20非推奨警告（v4が最新。GitHub側の更新待ちで実害なし。checkout/setup-nodeはv5に更新済み）
 
 ## 4. 次セッションでやること（優先順）
 
-1. 公開: GitHub Pages
-   - `vite.config.ts`に`base: '/body-earth/'`追加
-   - GitHubリポジトリ作成→push（user.emailはnoreply設定済み）
-   - 他プロジェクト（park-games等）と同じ公開手順が使える
-2. 体験の質向上（残りの候補）:
+1. 体験の質向上（残りの候補）:
    - レイヤー遷移にFresnel風の縁発光シェーダー（ホログラム感）
    - `clippingPlanes`による断面表示モード
+2. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
 3. 中期: フリーのglTF人体モデル（例: Z-Anatomy、BodyParts3D）への置き換え調査
 
 ## 5. 検証用メモ
