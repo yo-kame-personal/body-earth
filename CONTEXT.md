@@ -1,7 +1,7 @@
 # CONTEXT.md — BODY EARTH 開発引き継ぎ
 
 > 人体版 Google Earth（Webベース3Dインタラクティブアプリ）のMVP。
-> 最終更新: 2026-06-13（セッション3: Pages公開＋Fresnel縁発光＋断面表示＋実モデル調査まで完了）
+> 最終更新: 2026-06-13（セッション3: Pages公開＋Fresnel＋断面＋骨格を実モデル化(Step A)まで完了）
 
 ## 1. 現在のステータス
 
@@ -18,12 +18,13 @@
   - ホイールズーム→depth同期の回帰なし ✓
   - レイヤー遷移中のFresnel縁発光（depth=0.3/0.65で発光、0/1で消灯） ✓
   - 断面表示モード（「断面」トグル / `?clip=1`。回り込むと断面、OFFで通常描画に復帰） ✓
+  - **骨格レイヤーは実3Dモデル**（Z-Anatomy「関節学」glb）に差し替え済み。depth=0/0.65/1で検証＋公開URLでも確認 ✓
 - ローカル起動方法: `cd ~/Desktop/dev/body-earth && npm run dev`
 
 ## 2. 技術スタックとアーキテクチャ
 
 - **React 19 + Vite + TypeScript + @react-three/fiber (Three.js) + @react-three/drei + zustand**
-- アセットは外部3Dモデル不使用。**全てプリミティブ（capsule/sphere/cylinder/torus）によるプロシージャルなモック**
+- アセットは**ハイブリッド**: 骨格は実glbモデル（Z-Anatomy）、筋肉・皮膚・内臓は**プリミティブ（capsule/sphere/cylinder/torus）によるプロシージャルなモック**
 
 ### コアコンセプト: 「深度(depth)」による統一制御
 
@@ -38,8 +39,10 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 - `src/components/BodyPart.tsx` — 全パーツ共通のメッシュラッパー。不透明度0.35未満の層はクリックを奥の層へ通す（`stopPropagation`しない）のがミソ。Fresnel縁発光は`onBeforeCompile`でGLSL注入（強度`4*o*(1-o)*1.4`、半透明時のみ発光）。注入コードが全パーツ同一なのでGPUプログラムは1つに共有され、uniform `uRim`だけマテリアル毎に独立（three r184で確認済み）
 - 断面表示 — `store.clip` + DepthSliderの「断面」トグル。BodyPartが世界固定平面`CLIP_PLANES`(z=0, 前半分カット)を`clippingPlanes`に適用、`Canvas gl={{localClippingEnabled:true}}`が前提。断面中はDoubleSide＋裏面を`diffuse*0.45`で底上げ（GLSL注入内の`gl_FrontFacing`分岐）。clip切替はマテリアルの`key`を変えて作り直す方式
 - `src/components/layers/` — SkinLayer / MuscleLayer / CoreLayer。renderOrderは内側0→外側2で透明描画の破綻を抑制
+- 実モデル — `ModelLayer.tsx`がglbをdepth連動opacityで読む（`useGLTF(url,true)`でDraco対応、Suspense内で使用）。**CoreLayerの骨格はModelLayerに置換済み**（`/models/skeleton.glb`をscale1.95/y-1.62で配置）、内臓は当面プリミティブ。Sceneにレイヤー用Suspense境界あり
+- モデル変換 — Sketchfab等のglbを `assets-src/` に置き、`node scripts/optimize-model.mjs <in.glb> <name> --ratio 0.15` で simplify＋Draco＋specGloss変換し `public/models/<name>.glb` を生成。`assets-src/`は生ファイルをgitignore。クレジットは`public/models/CREDITS.md`とHUD
 - `src/data/parts.ts` — 部位ID→ダミー解説データ（21部位）。InfoPanelが参照
-- `scripts/verify-click.mjs` / `scripts/verify-easing.mjs` — headless検証スクリプト（devサーバー起動が前提）
+- `scripts/verify-{click,easing,clip}.mjs` — headless検証スクリプト（devサーバー起動が前提）
 
 ## 3. 既知の課題・未解決事項
 
@@ -53,11 +56,10 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 ## 4. 次セッションでやること（優先順）
 
 1. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
-2. 実3Dモデル置き換え: **方針は `docs/3d-model-research.md` に確定済み**。
-   **Blender不要ルートが判明**: Z-AnatomyのSketchfabモデルをglb直DL（要無料アカウント）→
-   `gltf-transform`でsimplify＋Draco圧縮（私が自動化可）→ `<ModelLayer>`で読み込み。
-   **Step A=骨格(Osteology)1個だけ差し替えるPoCから**。ユーザーの手作業はSketchfab DLのみ。
-   モデルは超高ポリ(180万〜200万三角形)なので軽量化必須。ライセンスはモデル毎にCC BY/BY-SAを確認・クレジット表記要
+2. 実モデル化の続き（**Step A=骨格は完了**。`docs/3d-model-research.md`参照）:
+   - ModelLayerに**Fresnel縁発光・断面clip対応を追加**（現状モデルは縁発光せず「断面」トグルにも反応しない＝BodyPartと挙動差あり）
+   - depth=1で内臓（プリミティブ）が実骨格に対しやや大きい/雑 → 内臓のサイズ微調整 or 実モデル化（Step B: 内臓学glb。CC BY-SA注意）
+   - Step B: 筋肉・皮膚も実モデル化（筋学/Myologyは CC BY-SA）
 3. 細かい改善候補: 断面位置を動かすスライダー、断面モード中のraycast抑制、部位データの充実（ダミー→実データ）
 
 ## 5. 検証用メモ

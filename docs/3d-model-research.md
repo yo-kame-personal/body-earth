@@ -72,6 +72,13 @@
 - 例: `npx @gltf-transform/cli optimize in.glb out.glb --simplify-error 0.01 --compress draco`
 - → **私(Claude)がスクリプト化して実行可能**。あなたの手作業はSketchfabからのDLのみ。
 
+### 【実施済み】Step A 完了（2026-06-13）
+- Sketchfab「関節学(Arthrology)」glb（CC BY 4.0、50.7MB）をDL → `gltf-transform`で
+  metalRough変換＋simplify(114万→40万頂点)＋Draco圧縮 → **1.0MBの`public/models/skeleton.glb`**
+- `ModelLayer`で読み込み、CoreLayerの骨格プリミティブを置換（scale1.95/y-1.62）
+- HUD＋CREDITS.mdにクレジット表記。depth各段＋公開URLで検証済み
+- 残課題: ModelLayerはFresnel縁発光・断面clip未対応。内臓はまだプリミティブ
+
 ### 改訂版・最短ルート（Step A: 骨格PoC、Blender不要）
 1. **あなた**: 無料Sketchfabアカウントを作成 → Osteology（骨格）モデルを **glbでダウンロード** → リポジトリの `assets-src/` に置く（手作業はこれだけ・5分）
 2. **私**: `gltf-transform` で simplify＋Draco圧縮し、数百KB〜2MB級の `public/models/skeleton.glb` を生成
