@@ -1,7 +1,7 @@
 # CONTEXT.md — BODY EARTH 開発引き継ぎ
 
 > 人体版 Google Earth（Webベース3Dインタラクティブアプリ）のMVP。
-> 最終更新: 2026-06-13（セッション3: Pages公開＋Fresnel＋断面＋骨格を実モデル化(Step A)まで完了）
+> 最終更新: 2026-06-13（セッション3: Pages公開＋Fresnel＋断面＋骨格を実モデル化(Step A)＋モデルのFresnel/断面対応まで完了）
 
 ## 1. 現在のステータス
 
@@ -19,6 +19,7 @@
   - レイヤー遷移中のFresnel縁発光（depth=0.3/0.65で発光、0/1で消灯） ✓
   - 断面表示モード（「断面」トグル / `?clip=1`。回り込むと断面、OFFで通常描画に復帰） ✓
   - **骨格レイヤーは実3Dモデル**（Z-Anatomy「関節学」glb）に差し替え済み。depth=0/0.65/1で検証＋公開URLでも確認 ✓
+  - 骨格モデルもFresnel縁発光・断面clipに反応（BodyPartと挙動統一済み） ✓
 - ローカル起動方法: `cd ~/Desktop/dev/body-earth && npm run dev`
 
 ## 2. 技術スタックとアーキテクチャ
@@ -36,8 +37,9 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 - `src/store.ts` — zustandストア。`depth`(0〜1)と`selectedId`だけが全状態。URLの`?depth=0.7`で初期深度指定可（デバッグ用）
 - `src/lib/depth.ts` — **最重要ファイル**。カメラ距離↔深度の変換と、レイヤーごとの不透明度カーブ（台形関数`trapezoid`）。`CURVES`定数を調整すれば遷移タイミングを変えられる。MIN_DISTANCE=3.4 / MAX_DISTANCE=7
 - `src/components/CameraRig.tsx` — 双方向同期＋イージング。スライダー由来のdepth変化は`MathUtils.damp`（λ=6）で目標距離へ滑らかに移動、ユーザーがホイール/ドラッグを始めたら`start`イベントで即中断。ホイールは`enableDamping`(0.08)の慣性。カメラ操作由来かスライダー由来かはepsilon(0.02)で判別
-- `src/components/BodyPart.tsx` — 全パーツ共通のメッシュラッパー。不透明度0.35未満の層はクリックを奥の層へ通す（`stopPropagation`しない）のがミソ。Fresnel縁発光は`onBeforeCompile`でGLSL注入（強度`4*o*(1-o)*1.4`、半透明時のみ発光）。注入コードが全パーツ同一なのでGPUプログラムは1つに共有され、uniform `uRim`だけマテリアル毎に独立（three r184で確認済み）
-- 断面表示 — `store.clip` + DepthSliderの「断面」トグル。BodyPartが世界固定平面`CLIP_PLANES`(z=0, 前半分カット)を`clippingPlanes`に適用、`Canvas gl={{localClippingEnabled:true}}`が前提。断面中はDoubleSide＋裏面を`diffuse*0.45`で底上げ（GLSL注入内の`gl_FrontFacing`分岐）。clip切替はマテリアルの`key`を変えて作り直す方式
+- `src/lib/layerMaterial.ts` — **レイヤー共通のマテリアル処理**（BodyPartとModelLayerで共有）。`makeRimInjector`(Fresnel縁発光のGLSL注入)/`rimStrength`(強度`4*o*(1-o)*1.4`、半透明時のみ)/`CLIP_PLANES`(断面平面 z=0)。注入コードが同一なのでGPUプログラムは共有、uniform `uRim`だけ独立（three r184で確認済み）
+- `src/components/BodyPart.tsx` — プリミティブ用メッシュラッパー。不透明度0.35未満の層はクリックを奥の層へ通す（`stopPropagation`しない）のがミソ。マテリアル処理はlayerMaterialから利用
+- 断面表示 — `store.clip` + DepthSliderの「断面」トグル。`Canvas gl={{localClippingEnabled:true}}`が前提。`CLIP_PLANES`(前半分カット)を適用、断面中はDoubleSide＋裏面を`diffuse*0.45`で底上げ（注入の`gl_FrontFacing`分岐）。BodyPartはマテリアルの`key`で作り直し、ModelLayerは`needsUpdate`で対応
 - `src/components/layers/` — SkinLayer / MuscleLayer / CoreLayer。renderOrderは内側0→外側2で透明描画の破綻を抑制
 - 実モデル — `ModelLayer.tsx`がglbをdepth連動opacityで読む（`useGLTF(url,true)`でDraco対応、Suspense内で使用）。**CoreLayerの骨格はModelLayerに置換済み**（`/models/skeleton.glb`をscale1.95/y-1.62で配置）、内臓は当面プリミティブ。Sceneにレイヤー用Suspense境界あり
 - モデル変換 — Sketchfab等のglbを `assets-src/` に置き、`node scripts/optimize-model.mjs <in.glb> <name> --ratio 0.15` で simplify＋Draco＋specGloss変換し `public/models/<name>.glb` を生成。`assets-src/`は生ファイルをgitignore。クレジットは`public/models/CREDITS.md`とHUD
@@ -56,10 +58,9 @@ depth: 0.0 ───────── 0.4 ───────── 0.8 ─�
 ## 4. 次セッションでやること（優先順）
 
 1. スマホ実機での操作感確認（ピンチズーム）。公開済みなのでURLを開くだけ
-2. 実モデル化の続き（**Step A=骨格は完了**。`docs/3d-model-research.md`参照）:
-   - ModelLayerに**Fresnel縁発光・断面clip対応を追加**（現状モデルは縁発光せず「断面」トグルにも反応しない＝BodyPartと挙動差あり）
+2. 実モデル化の続き（**Step A=骨格は完了。ModelLayerのFresnel/clip対応も完了**。`docs/3d-model-research.md`参照）:
    - depth=1で内臓（プリミティブ）が実骨格に対しやや大きい/雑 → 内臓のサイズ微調整 or 実モデル化（Step B: 内臓学glb。CC BY-SA注意）
-   - Step B: 筋肉・皮膚も実モデル化（筋学/Myologyは CC BY-SA）
+   - Step B: 筋肉・皮膚も実モデル化（筋学/Myologyは CC BY-SA）。手順は確立済み（DL→optimize-model.mjs→ModelLayer）
 3. 細かい改善候補: 断面位置を動かすスライダー、断面モード中のraycast抑制、部位データの充実（ダミー→実データ）
 
 ## 5. 検証用メモ
