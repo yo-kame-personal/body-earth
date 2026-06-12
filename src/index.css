@@ -1,0 +1,159 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
+  background: #070b14;
+  color: #e8ecf5;
+  overflow: hidden;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+}
+
+/* ---- HUD（タイトル・操作ヒント） ---- */
+.hud {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  pointer-events: none;
+}
+
+.hud h1 {
+  font-size: 20px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.hud h1 span {
+  font-size: 12px;
+  color: #8fa3c8;
+  margin-left: 10px;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+.hud p {
+  font-size: 12px;
+  color: #8fa3c8;
+  margin-top: 6px;
+}
+
+/* ---- 深度スライダー ---- */
+.depth-slider {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 20px;
+  width: min(440px, 84vw);
+  background: rgba(13, 20, 36, 0.72);
+  border: 1px solid rgba(143, 163, 200, 0.25);
+  border-radius: 14px;
+  padding: 12px 18px;
+  backdrop-filter: blur(8px);
+}
+
+.depth-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8fa3c8;
+  margin-bottom: 6px;
+}
+
+.depth-slider input {
+  width: 100%;
+  accent-color: #5b8cff;
+}
+
+.depth-current {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 6px;
+  color: #cdd8ee;
+}
+
+/* ---- インフォパネル ---- */
+.info-panel {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  width: 290px;
+  background: rgba(13, 20, 36, 0.85);
+  border: 1px solid rgba(143, 163, 200, 0.25);
+  border-radius: 14px;
+  padding: 18px;
+  backdrop-filter: blur(8px);
+}
+
+.info-panel h2 {
+  font-size: 18px;
+  margin: 8px 0;
+}
+
+.info-panel p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #cdd8ee;
+}
+
+.info-panel .fact {
+  margin-top: 10px;
+  background: rgba(91, 140, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.info-panel .note {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #71809d;
+}
+
+.info-panel .close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #8fa3c8;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.layer-chip {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+.layer-skin {
+  color: #f2b08a;
+  border-color: #f2b08a;
+}
+
+.layer-muscle {
+  color: #ff7b6e;
+  border-color: #ff7b6e;
+}
+
+.layer-core {
+  color: #e8e2d2;
+  border-color: #e8e2d2;
+}
