@@ -31,6 +31,7 @@ export function Hotspots() {
       <Hotspot partId="muscle-face" position={[0, 1.5, 0.28]} radius={0.14} active={muscle} />
       <Hotspot partId="muscle-chest" position={[0.18, 0.85, 0.24]} radius={0.13} active={muscle} />
       <Hotspot partId="muscle-abs" position={[0, 0.4, 0.26]} radius={0.13} active={muscle} />
+      <Hotspot partId="muscle-torso" position={[0.3, 0.5, 0.16]} radius={0.12} active={muscle} />
       <Hotspot partId="muscle-arm" position={[0.6, 0.25, 0.08]} radius={0.12} active={muscle} />
       <Hotspot partId="muscle-leg" position={[0.24, -1.0, 0.12]} radius={0.14} active={muscle} />
 

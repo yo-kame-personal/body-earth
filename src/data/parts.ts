@@ -8,7 +8,8 @@ export interface PartInfo {
   fact: string
 }
 
-// ※ MVP用のダミーデータ。将来はAPIや本格的なデータソースに置き換える
+// 各部位の解説データ（21部位）。子ども向けに、要約(summary)＋豆知識(fact)の2段構成。
+// Hotspots.tsx のクリック判定球と partId が 1:1 で対応している。
 export const PARTS: Record<string, PartInfo> = {
   'skin-head': {
     name: '頭部の皮膚',
