@@ -4,8 +4,18 @@
 import { Plane, Vector3 } from 'three'
 import type { WebGLProgramParametersWithUniforms } from 'three'
 
-// 断面モードで使う固定クリップ平面（前半分カット）
-export const CLIP_PLANES = [new Plane(new Vector3(0, 0, -1), 0)]
+// 断面の切る深さ clipPos(0..1) を、クリップ平面の constant(world z) に変換する。
+// 平面は法線(0,0,-1)なので z <= constant 側が残る。
+//   clipPos=0 → C=0.4  : ほぼ全身が残る（体の最前面だけ薄く削る）
+//   clipPos=0.5 → C=0.05: 前半分カット（従来の固定断面とほぼ同じ）
+//   clipPos=1 → C=-0.3 : 奥（背中側）まで深くカット
+export function clipConstant(clipPos: number): number {
+  return 0.4 - clipPos * 0.7
+}
+
+// 断面モードで使う共有クリップ平面。constant を書き換えると全レイヤーに即反映される
+// （frameloop=always なので needsUpdate 不要）。初期値は clipPos=0.5（前半分）。
+export const CLIP_PLANES = [new Plane(new Vector3(0, 0, -1), clipConstant(0.5))]
 
 // 半透明時(o≈0.5)に最大、完全表示/非表示(o=0/1)でゼロになる発光強度
 export function rimStrength(opacity: number): number {

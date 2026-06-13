@@ -6,6 +6,8 @@ export function DepthSlider() {
   const setDepth = useBodyStore((s) => s.setDepth)
   const clip = useBodyStore((s) => s.clip)
   const toggleClip = useBodyStore((s) => s.toggleClip)
+  const clipPos = useBodyStore((s) => s.clipPos)
+  const setClipPos = useBodyStore((s) => s.setClipPos)
 
   return (
     <div className="depth-slider">
@@ -36,6 +38,24 @@ export function DepthSlider() {
           断面 {clip ? 'ON' : 'OFF'}
         </button>
       </div>
+      {clip && (
+        <div className="clip-slider">
+          <div className="clip-slider-labels">
+            <span>手前</span>
+            <span>断面の位置</span>
+            <span>奥</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.001}
+            value={clipPos}
+            onChange={(e) => setClipPos(Number(e.target.value))}
+            aria-label="断面の位置スライダー"
+          />
+        </div>
+      )}
     </div>
   )
 }

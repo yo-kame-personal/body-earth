@@ -123,6 +123,25 @@ canvas {
   border-color: #5b8cff;
 }
 
+.clip-slider {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(143, 163, 200, 0.18);
+}
+
+.clip-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8fa3c8;
+  margin-bottom: 4px;
+}
+
+.clip-slider input {
+  width: 100%;
+  accent-color: #5b8cff;
+}
+
 /* ---- インフォパネル ---- */
 .info-panel {
   position: absolute;

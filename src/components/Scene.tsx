@@ -1,10 +1,22 @@
 import { Stars } from '@react-three/drei'
-import { Suspense } from 'react'
+import { Suspense, useLayoutEffect } from 'react'
+import { CLIP_PLANES, clipConstant } from '../lib/layerMaterial'
+import { useBodyStore } from '../store'
 import { CameraRig } from './CameraRig'
 import { Hotspots } from './Hotspots'
 import { CoreLayer } from './layers/CoreLayer'
 import { MuscleLayer } from './layers/MuscleLayer'
 import { SkinLayer } from './layers/SkinLayer'
+
+// 断面スライダー(clipPos)を共有クリップ平面のconstantへ反映する。
+// 平面インスタンスは全レイヤーで共有されるため1か所書き換えれば全体に効く。
+function ClipController() {
+  const clipPos = useBodyStore((s) => s.clipPos)
+  useLayoutEffect(() => {
+    CLIP_PLANES[0].constant = clipConstant(clipPos)
+  }, [clipPos])
+  return null
+}
 
 export function Scene() {
   return (
@@ -24,6 +36,7 @@ export function Scene() {
       </Suspense>
       <Hotspots />
       <CameraRig />
+      <ClipController />
     </>
   )
 }
