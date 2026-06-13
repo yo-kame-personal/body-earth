@@ -173,12 +173,6 @@ canvas {
   padding: 8px 10px;
 }
 
-.info-panel .note {
-  margin-top: 10px;
-  font-size: 11px;
-  color: #71809d;
-}
-
 .info-panel .close {
   position: absolute;
   top: 10px;

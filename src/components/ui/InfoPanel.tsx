@@ -18,7 +18,6 @@ export function InfoPanel() {
       <h2>{part.name}</h2>
       <p>{part.summary}</p>
       <p className="fact">💡 {part.fact}</p>
-      <p className="note">※ MVP用のダミーデータです</p>
     </aside>
   )
 }
