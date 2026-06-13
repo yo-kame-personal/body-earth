@@ -13,6 +13,8 @@ interface ModelLayerProps {
   position?: [number, number, number]
   rotation?: [number, number, number]
   scale?: number | [number, number, number]
+  /** 透明描画順。内側ほど小さく（骨格内臓0→筋肉1→皮膚2）。既定0 */
+  renderOrder?: number
 }
 
 /**
@@ -20,7 +22,7 @@ interface ModelLayerProps {
  * BodyPart（プリミティブ）と同じFresnel縁発光・断面clipを共有マテリアル処理で適用する。
  * 必ず <Suspense> の内側で使うこと（ロード中はサスペンドする）。
  */
-export function ModelLayer({ src, layer, position, rotation, scale }: ModelLayerProps) {
+export function ModelLayer({ src, layer, position, rotation, scale, renderOrder = 0 }: ModelLayerProps) {
   // 第2引数trueでDraco対応（drei既定のCDNデコーダを使用）
   const { scene } = useGLTF(import.meta.env.BASE_URL.replace(/\/$/, '') + src, true)
   const opacity = useBodyStore((s) => layerOpacity(layer, s.depth))
@@ -41,10 +43,11 @@ export function ModelLayer({ src, layer, position, rotation, scale }: ModelLayer
         m.transparent = true
         m.onBeforeCompile = inject
         obj.material = m
+        obj.renderOrder = renderOrder
       }
     })
     return root
-  }, [scene, rimUniform])
+  }, [scene, rimUniform, renderOrder])
 
   // depth変化のたびに不透明度と表示可否を更新
   useLayoutEffect(() => {

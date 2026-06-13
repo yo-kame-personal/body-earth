@@ -77,7 +77,16 @@
   metalRough変換＋simplify(114万→40万頂点)＋Draco圧縮 → **1.0MBの`public/models/skeleton.glb`**
 - `ModelLayer`で読み込み、CoreLayerの骨格プリミティブを置換（scale1.95/y-1.62）
 - HUD＋CREDITS.mdにクレジット表記。depth各段＋公開URLで検証済み
-- 残課題: ModelLayerはFresnel縁発光・断面clip未対応。内臓はまだプリミティブ
+
+### 【実施済み】Step B 完了（2026-06-13・セッション4）
+- Sketchfab「内臓学(Splanchnology)」(CC BY-SA 4.0、49.9MB)・「筋学(Myology)」(CC BY-SA 4.0、161MB)を
+  DL → 同スクリプトで変換 → **viscera.glb(0.78MB) / muscle.glb(2.48MB)**（3モデル計4.3MB）
+- CoreLayerに内臓ModelLayer追加（骨格と同じscale1.95/y-1.62で解剖学的に整合）、MuscleLayerを実モデル化
+- `optimize-model.mjs`に**metal/rough変換(specGloss→metalRough)を組み込み**。three r184はspecGloss非対応で
+  マテリアルが正しく描画されない問題を解消（内臓の色が正確に: 心臓=赤/肝臓=赤茶/腸=ピンク等）
+  - 補足: 内臓はspecGlossを使用、筋肉はspecGloss非使用、骨格はStep Aで変換済みだった
+- ModelLayerに`renderOrder`を追加（骨格内臓0/筋肉1/皮膚2で透明描画順を維持）
+- 残課題: **皮膚のみプリミティブ**（皮膚モデル未DL）。実モデルはクリック→InfoPanel非対応
 
 ### 改訂版・最短ルート（Step A: 骨格PoC、Blender不要）
 1. **あなた**: 無料Sketchfabアカウントを作成 → Osteology（骨格）モデルを **glbでダウンロード** → リポジトリの `assets-src/` に置く（手作業はこれだけ・5分）
