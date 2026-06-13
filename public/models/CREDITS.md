@@ -18,6 +18,8 @@ Sketchfab: https://sketchfab.com/Z-Anatomy
 - 原題: **"Splanchnology"（内臓学）** by **Z-Anatomy**
 - 出典: https://sketchfab.com/Z-Anatomy （Splanchnology モデル）
 - ライセンス: **CC BY-SA 4.0**（https://creativecommons.org/licenses/by-sa/4.0/ ）
+- 改変: 内臓学モデルには位置参照用に骨格が同梱されているため、`scripts/extract-viscera.mjs`
+  で骨格メッシュ（arthrologyと共通の部分）を除去し、**内臓のみ**にしてから最適化している。
 
 ## muscle.glb（筋肉レイヤー）
 

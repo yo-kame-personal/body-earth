@@ -1,6 +1,7 @@
 import { Stars } from '@react-three/drei'
 import { Suspense } from 'react'
 import { CameraRig } from './CameraRig'
+import { Hotspots } from './Hotspots'
 import { CoreLayer } from './layers/CoreLayer'
 import { MuscleLayer } from './layers/MuscleLayer'
 import { SkinLayer } from './layers/SkinLayer'
@@ -21,6 +22,7 @@ export function Scene() {
           <SkinLayer />
         </group>
       </Suspense>
+      <Hotspots />
       <CameraRig />
     </>
   )

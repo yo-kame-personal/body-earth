@@ -12,7 +12,8 @@ export function DepthSlider() {
       <div className="depth-labels">
         <span>皮膚</span>
         <span>筋肉</span>
-        <span>骨格・内臓</span>
+        <span>骨格</span>
+        <span>内臓</span>
       </div>
       <input
         type="range"

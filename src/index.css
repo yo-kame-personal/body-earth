@@ -188,7 +188,12 @@ canvas {
   border-color: #ff7b6e;
 }
 
-.layer-core {
+.layer-skeleton {
   color: #e8e2d2;
   border-color: #e8e2d2;
+}
+
+.layer-viscera {
+  color: #ff9eb5;
+  border-color: #ff9eb5;
 }

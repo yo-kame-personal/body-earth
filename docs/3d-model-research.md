@@ -86,7 +86,18 @@
   マテリアルが正しく描画されない問題を解消（内臓の色が正確に: 心臓=赤/肝臓=赤茶/腸=ピンク等）
   - 補足: 内臓はspecGlossを使用、筋肉はspecGloss非使用、骨格はStep Aで変換済みだった
 - ModelLayerに`renderOrder`を追加（骨格内臓0/筋肉1/皮膚2で透明描画順を維持）
-- 残課題: **皮膚のみプリミティブ**（皮膚モデル未DL）。実モデルはクリック→InfoPanel非対応
+- 残課題: **皮膚のみプリミティブ**（皮膚モデル未DL）
+
+### 【知見】Z-Anatomyモデルは累積レイヤー構造（セッション5で判明）
+- 内臓学(Splanchnology)モデルには**位置参照用の骨格が同梱**されている（ノード名 "Z-Anatomy-Layers1-7"、骨学は "Layer1-3"）。
+  そのまま内臓レイヤーに使うと、骨格レイヤーをフェードアウトしても骨が残ってしまう。
+- 対処: `scripts/extract-viscera.mjs` で arthrology(骨格)と共通のメッシュ（頂点数＋bbox一致で判定）を除去 → 内臓のみのglbを生成してから最適化。
+- メッシュ名は連番(Object_N)で解剖学的名称が無いため、**クリック判定には使えない** → 主要部位に座標ベースのHotspot(見えないクリック判定球)を置く方式を採用。
+
+### セッション5の主な変更（深度4段階化＋部位クリック）
+- depthを `skin / muscle / skeleton / viscera` の4レイヤーに分割（`src/lib/depth.ts` の CURVES）。最深部で骨格が消え内臓だけが残る。
+- 内臓から骨格を除去（上記 extract-viscera）。skeleton.glb もmetal/rough込みで再変換。
+- `Hotspot`/`Hotspots` コンポーネントで主要部位のクリック→InfoPanel を実現。
 
 ### 改訂版・最短ルート（Step A: 骨格PoC、Blender不要）
 1. **あなた**: 無料Sketchfabアカウントを作成 → Osteology（骨格）モデルを **glbでダウンロード** → リポジトリの `assets-src/` に置く（手作業はこれだけ・5分）
