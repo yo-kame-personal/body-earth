@@ -1,5 +1,7 @@
-import { activeLayerLabel } from '../../lib/depth'
+import { useState } from 'react'
+import { activeLayerLabel, layerOpacity } from '../../lib/depth'
 import { useBodyStore } from '../../store'
+import { DressUpPanel } from './DressUpPanel'
 
 export function DepthSlider() {
   const depth = useBodyStore((s) => s.depth)
@@ -9,8 +11,14 @@ export function DepthSlider() {
   const clipPos = useBodyStore((s) => s.clipPos)
   const setClipPos = useBodyStore((s) => s.setClipPos)
 
+  // きせかえは皮膚が見える深度のときだけ操作可能
+  const skinVisible = layerOpacity('skin', depth) >= 0.3
+  const [dressOpen, setDressOpen] = useState(false)
+  const showDress = skinVisible && dressOpen
+
   return (
     <div className="depth-slider">
+      {showDress && <DressUpPanel />}
       <div className="depth-labels">
         <span>皮膚</span>
         <span>筋肉</span>
@@ -30,6 +38,15 @@ export function DepthSlider() {
         <div className="depth-current">
           現在のレイヤー: {activeLayerLabel(depth)}（深度 {(depth * 100).toFixed(0)}%）
         </div>
+        {skinVisible && (
+          <button
+            className={`clip-toggle${dressOpen ? ' on' : ''}`}
+            onClick={() => setDressOpen((v) => !v)}
+            aria-pressed={dressOpen}
+          >
+            きせかえ
+          </button>
+        )}
         <button
           className={`clip-toggle${clip ? ' on' : ''}`}
           onClick={toggleClip}

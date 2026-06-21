@@ -4,7 +4,9 @@ import { CLIP_PLANES, clipConstant } from '../lib/layerMaterial'
 import { useBodyStore } from '../store'
 import { CameraRig } from './CameraRig'
 import { Hotspots } from './Hotspots'
+import { ClothingLayer } from './layers/ClothingLayer'
 import { CoreLayer } from './layers/CoreLayer'
+import { FaceLayer } from './layers/FaceLayer'
 import { MuscleLayer } from './layers/MuscleLayer'
 import { SkinLayer } from './layers/SkinLayer'
 
@@ -32,6 +34,8 @@ export function Scene() {
           <CoreLayer />
           <MuscleLayer />
           <SkinLayer />
+          <ClothingLayer />
+          <FaceLayer />
         </group>
       </Suspense>
       <Hotspots />

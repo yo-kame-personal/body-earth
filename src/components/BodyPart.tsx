@@ -17,6 +17,12 @@ interface BodyPartProps {
   scale?: number | [number, number, number]
   renderOrder?: number
   roughness?: number
+  /** 金属感（スキン用）。省略時0 */
+  metalness?: number
+  /** スキン由来の自己発光色。hover/選択時は白で上書きされる。省略時は発光なし */
+  baseEmissive?: string
+  /** スキン由来の自己発光強度。省略時0 */
+  baseEmissiveIntensity?: number
 }
 
 export function BodyPart({
@@ -29,6 +35,9 @@ export function BodyPart({
   scale,
   renderOrder = 0,
   roughness = 0.7,
+  metalness = 0,
+  baseEmissive = '#000000',
+  baseEmissiveIntensity = 0,
 }: BodyPartProps) {
   const select = useBodyStore((s) => s.select)
   const selected = useBodyStore((s) => s.selectedId === partId)
@@ -74,14 +83,15 @@ export function BodyPart({
         key={clip ? 'clip' : 'plain'}
         color={color}
         roughness={roughness}
+        metalness={metalness}
         transparent
         opacity={opacity}
         side={clip ? DoubleSide : FrontSide}
         clippingPlanes={clip ? CLIP_PLANES : null}
         onBeforeCompile={injectRim}
         depthWrite={opacity > 0.95}
-        emissive={selected || hovered ? '#ffffff' : '#000000'}
-        emissiveIntensity={selected ? 0.3 : hovered ? 0.12 : 0}
+        emissive={selected || hovered ? '#ffffff' : baseEmissive}
+        emissiveIntensity={selected ? 0.3 : hovered ? 0.12 : baseEmissiveIntensity}
       />
     </mesh>
   )

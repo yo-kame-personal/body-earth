@@ -142,6 +142,79 @@ canvas {
   accent-color: #5b8cff;
 }
 
+/* ---- きせかえパネル（深度スライダーのパネル内・上段） ---- */
+.dress-panel {
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(143, 163, 200, 0.18);
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.dress-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dress-slot-label {
+  flex-shrink: 0;
+  width: 52px;
+  font-size: 11px;
+  color: #8fa3c8;
+}
+
+.dress-items {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.dress-chip {
+  flex-shrink: 0;
+  font-size: 12px;
+  white-space: nowrap;
+  color: #cdd8ee;
+  background: rgba(143, 163, 200, 0.12);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.dress-chip.emoji {
+  font-size: 18px;
+  padding: 2px 6px;
+  line-height: 1.2;
+}
+
+.dress-chip.on {
+  border-color: #eaf3ff;
+  box-shadow: 0 0 0 2px rgba(91, 140, 255, 0.6);
+}
+
+.skin-swatch {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(143, 163, 200, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.skin-swatch:hover {
+  transform: scale(1.12);
+}
+
+.skin-swatch.on {
+  border-color: #eaf3ff;
+  box-shadow: 0 0 0 2px rgba(91, 140, 255, 0.6);
+}
+
 /* ---- インフォパネル ---- */
 .info-panel {
   position: absolute;

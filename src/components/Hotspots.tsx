@@ -11,11 +11,11 @@ const THRESH = 0.5
 // レイヤー判定と一緒にzを参照できるようデータとして持つ。
 type Spot = { id: string; pos: [number, number, number]; r: number; layer: LayerId }
 const SPOTS: Spot[] = [
-  // 皮膚
-  { id: 'skin-head', pos: [0, 1.5, 0.32], r: 0.16, layer: 'skin' },
-  { id: 'skin-torso', pos: [0, 0.55, 0.42], r: 0.2, layer: 'skin' },
-  { id: 'skin-arm', pos: [0.6, 0.25, 0.12], r: 0.13, layer: 'skin' },
-  { id: 'skin-leg', pos: [0.24, -1.05, 0.16], r: 0.15, layer: 'skin' },
+  // 皮膚（bodyShapeの体型に合わせた近似配置）
+  { id: 'skin-head', pos: [0, 1.5, 0.26], r: 0.16, layer: 'skin' },
+  { id: 'skin-torso', pos: [0, 0.6, 0.2], r: 0.2, layer: 'skin' },
+  { id: 'skin-arm', pos: [0.36, 0.4, 0.1], r: 0.12, layer: 'skin' },
+  { id: 'skin-leg', pos: [0.15, -1.0, 0.12], r: 0.14, layer: 'skin' },
   // 筋肉
   { id: 'muscle-face', pos: [0, 1.5, 0.28], r: 0.14, layer: 'muscle' },
   { id: 'muscle-chest', pos: [0.18, 0.85, 0.24], r: 0.13, layer: 'muscle' },
